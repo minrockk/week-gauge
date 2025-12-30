@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Week Gauge</title>
+  <title>Week HUD</title>
   <style>
     :root{
       --bg: transparent;
-      --text: #eaeaea;
-      --muted: rgba(255,255,255,.65);
       --line-bg: rgba(255,255,255,.18);
-      --line-fill: rgba(255,255,255,.85);
+      --line-fill: rgba(255,255,255,.88);
       --shadow: rgba(0,0,0,.35);
-      --radius: 8px;
-      --gap: 10px;
-      --h: 120px; /* 노션 embed 높이 맞추는 용 */
+      --text: rgba(255,255,255,.92);
+
+      /* 노션 embed 높이: 필요하면 70~110 사이로 조정 */
+      --h: 72px;
     }
 
     body{
@@ -22,7 +21,6 @@
       padding: 14px 14px 10px;
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      color: var(--text);
       height: var(--h);
       box-sizing: border-box;
     }
@@ -32,17 +30,15 @@
       margin: 0 auto;
     }
 
-    /* 상단 진행 라인 */
-    .progress-row{
+    .row{
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
     }
 
-    .progress-line{
+    .line{
       flex: 1;
-      height: 14px;
+      height: 20px;
       border-radius: 999px;
       background: var(--line-bg);
       position: relative;
@@ -50,7 +46,7 @@
       box-shadow: 0 2px 10px var(--shadow) inset;
     }
 
-    .progress-fill{
+    .fill{
       height: 100%;
       width: 0%;
       background: var(--line-fill);
@@ -58,136 +54,66 @@
       transition: width .35s ease;
     }
 
-    /* 현재 위치 커서(작은 점) */
     .cursor{
       position: absolute;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 999px;
       background: white;
-      box-shadow: 0 2px 12px rgba(0,0,0,.45);
+      box-shadow: 0 2px 14px rgba(0,0,0,.45);
       pointer-events: none;
     }
 
-    /* 퍼센트 텍스트 (원하면 숨겨도 됨) */
     .pct{
-      width: 68px;
+      width: 64px;
       text-align: right;
-      font-weight: 700;
+      font-weight: 800;
+      color: var(--text);
       letter-spacing: .2px;
-      color: rgba(255,255,255,.92);
+      user-select: none;
     }
 
-    /* 요일 탭 */
-    .days{
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: var(--gap);
-    }
-
-    .day{
-      border-radius: var(--radius);
-      padding: 10px 10px;
-      font-weight: 700;
-      font-size: 15px;
-      line-height: 1.1;
-      color: rgba(255,255,255,.92);
-      box-shadow: 0 6px 16px var(--shadow);
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.10);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* “오늘” 강조 */
-    .day.today{
-      outline: 2px solid rgba(255,255,255,.85);
-      transform: translateY(-1px);
-    }
-
-    /* 각 요일 컬러(스샷 느낌) */
-    .sun{ background: rgba(255,255,255,.08); }
-    .mon{ background: rgba(255,120,120,.18); }
-    .tue{ background: rgba(255,190,90,.20); }
-    .wed{ background: rgba(200,180,80,.18); }
-    .thu{ background: rgba(90,170,120,.18); }
-    .fri{ background: rgba(140,90,190,.18); }
-    .sat{ background: rgba(80,150,220,.18); }
-
-    /* 노션 배경(다크) 위에서 더 선명하게 보이도록 */
-    .day span.small{
-      display:block;
-      margin-top: 4px;
-      font-weight: 600;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* 모바일에서 너무 좁으면 2줄로 */
-    @media (max-width: 820px){
-      .days{ grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 520px){
-      .days{ grid-template-columns: repeat(2, 1fr); }
-      .pct{ display:none; }
-    }
+    /* 퍼센트 숨기고 싶으면 여기 주석 해제 */
+    /*
+    .pct { display:none; }
+    */
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="progress-row">
-      <div class="progress-line" aria-label="Week Progress">
-        <div class="progress-fill" id="fill"></div>
+    <div class="row">
+      <div class="line" aria-label="Week Progress">
+        <div class="fill" id="fill"></div>
         <div class="cursor" id="cursor"></div>
       </div>
       <div class="pct" id="pct">0%</div>
-    </div>
-
-    <div class="days" id="days">
-      <!-- JS가 오늘 표시만 붙여줌 -->
-      <div class="day sun">Sun : 🏠 (Space)</div>
-      <div class="day mon">Mon : 🥗 (Health)</div>
-      <div class="day tue">Tue : 💰 (Money)</div>
-      <div class="day wed">Wed : 🧑‍💼 (Work)</div>
-      <div class="day thu">Thu : 🤝 (Relationship)</div>
-      <div class="day fri">Fri : ⏱ (Time)</div>
-      <div class="day sat">Sat : ⛸️ (Hobby)</div>
     </div>
   </div>
 
   <script>
     function update(){
       const now = new Date();
-      const day = now.getDay(); // 0=Sun, 6=Sat
+      const day = now.getDay(); // 0=Sun ... 6=Sat
 
-      // 0~6 -> 0~100 (연속)
-      const percent = (day / 6) * 100;
+      // "요일 슬롯 7칸" 기준으로 각 요일의 중앙에 커서를 놓음
+      // slot = 100/7
+      // cursorPos = slot*day + slot/2
+      const slot = 100 / 7;
+      const cursorPos = slot * day + slot / 2;
 
-      // fill + cursor
-      const fill = document.getElementById("fill");
-      const cursor = document.getElementById("cursor");
-      const pct = document.getElementById("pct");
+      // 퍼센트 표기용: 일요일 0, 토요일 100 (기존 요구 유지)
+      const pct = (day / 6) * 100;
 
-      fill.style.width = percent + "%";
-      pct.textContent = Math.round(percent) + "%";
-
-      // cursor 위치: 0%일 때 왼쪽 끝, 100%일 때 오른쪽 끝
-      // line 내부에서 percent만큼 이동
-      cursor.style.left = percent + "%";
-
-      // 오늘 카드 강조
-      const dayClasses = ["sun","mon","tue","wed","thu","fri","sat"];
-      const cards = document.querySelectorAll(".day");
-      cards.forEach(c => c.classList.remove("today"));
-      cards[day].classList.add("today");
+      document.getElementById("fill").style.width = cursorPos + "%";
+      document.getElementById("cursor").style.left = cursorPos + "%";
+      document.getElementById("pct").textContent = Math.round(pct) + "%";
     }
 
     update();
-    setInterval(update, 60 * 1000); // 1분마다 업데이트
+    setInterval(update, 60 * 1000);
   </script>
 </body>
 </html>
