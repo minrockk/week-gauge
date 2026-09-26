@@ -1,34 +1,82 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Week HUD</title>
 
   <style>
+
+    /* =========================================================
+       WEEK HUD
+       ---------------------------------------------------------
+       Desktop  : 요일 + 영역명
+       Compact  : 요일만 표시
+       Mobile   : 한 글자 요일
+
+       Google Calendar 영역 색상 기반
+       ========================================================= */
+
     :root {
+
       /* Notion Dark */
       --bg: #191919;
 
-      /* Timeline */
-      --track: #3a3a3a;
-      --fill: #8b7cf6;
-
-      /* Dots */
-      --dot: #686868;
-      --current: #9b8cff;
-
       /* Text */
-      --text: #929292;
-      --text-current: #f1f1f1;
+      --text-main: #eeeeee;
+      --text-sub: #9b9b9b;
+      --text-dim: #6f6f6f;
 
-      /*
-        처음 코드와 동일한 핵심 구조
-      */
-      --h: 52px;
-      --xpad: 4px;
+      /* Week Indicator */
+      --week-off-bg: #292929;
+      --week-off-border: #3a3a3a;
+      --week-off-text: #858585;
+
+      --week-active: #4285d4;
+
+      /* =====================================================
+         Google Calendar 영역 색상
+         캡처 기준 근사값
+         ===================================================== */
+
+      /* SUN · 7 Time */
+      --sun: #a47ac3;
+
+      /* MON · 1 Health */
+      --mon: #e85d3f;
+
+      /* TUE · 2 Space */
+      --tue: #f28c38;
+
+      /* WED · 3 Money */
+      --wed: #f2c94c;
+
+      /* THU · 4 Work */
+      --thu: #51a675;
+
+      /* FRI · 5 Relationship */
+      --fri: #4c9ad4;
+
+      /* SAT · 6 Hobby */
+      --sat: #7458c7;
+
+
+      /* Layout */
+
+      --hud-padding-x: 14px;
+
+      --dot-size: 11px;
+      --dot-current: 15px;
+
+      --week-size: 25px;
+
     }
 
+
+    /* =========================================================
+       RESET
+       ========================================================= */
 
     * {
       box-sizing: border-box;
@@ -53,254 +101,688 @@
         "Noto Sans KR",
         sans-serif;
 
-      box-sizing: border-box;
-    }
-
-
-    body {
-      height: var(--h);
       overflow: hidden;
     }
 
 
-    /*
-      처음 코드의 wrap 구조 유지
-    */
+    body {
+      padding:
+        8px
+        var(--hud-padding-x)
+        6px;
+    }
 
-    .wrap {
+
+
+    /* =========================================================
+       HUD
+       ========================================================= */
+
+    .hud {
       width: 100%;
       height: 100%;
-
-      padding: 0 var(--xpad);
-
-      box-sizing: border-box;
 
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
+
+      justify-content: center;
+
+      gap: 12px;
     }
 
 
-    /*
-      전체 HUD
-    */
 
-    .barbox {
+    /* =========================================================
+       TOP ROW
+       WEEK 1 2 3 4 5                         92%
+       ========================================================= */
+
+    .top-row {
+
       width: 100%;
-      height: 43px;
 
-      position: relative;
+      display: flex;
+      align-items: center;
+
+      min-height: 26px;
+
     }
 
 
-    /*
-      진행선
+    .week-label {
 
-      첫 번째 점과 마지막 점의
-      중앙까지만 연결
-    */
+      margin-right: 11px;
 
- .line {
-  position: absolute;
+      color: var(--text-sub);
 
-  left: 0;
-  right: 0;
+      font-size: 10px;
+      font-weight: 700;
 
-  top: 12px;
-  height: 3px;
+      letter-spacing: 1px;
 
-  border-radius: 999px;
-  background: var(--track);
-  overflow: hidden;
-  z-index: 1;
-      }
+      user-select: none;
 
-
-    /*
-      진행된 부분
-    */
-
-    .fill {
-      height: 100%;
-      width: 0%;
-
-      background: var(--fill);
-
-      border-radius: 999px;
-
-      transition: width .35s ease;
     }
 
 
-    /*
-      7개 요일
-    */
 
-.days {
-  position: absolute;
+    /* =========================================================
+       MONTH WEEK INDICATOR
+       ========================================================= */
 
-  top: 0;
-  left: 0;
+    .weeks {
 
-  width: 100%;
-  height: 100%;
+      display: flex;
+      align-items: center;
 
-  z-index: 2;
-}
+      gap: 7px;
+
+    }
 
 
-/*
-  개별 요일
-*/
+    .week {
 
-.day {
-  position: absolute;
+      width: var(--week-size);
+      height: var(--week-size);
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+      flex: 0 0 var(--week-size);
 
-  color: var(--text);
-
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .35px;
-
-  user-select: none;
-
-  transform: translateX(-50%);
-}
-
-
-/* SUN - 왼쪽 끝 */
-.day:nth-child(1) {
-  left: 0%;
-  transform: none;
-  align-items: flex-start;
-}
-
-
-/* MON */
-.day:nth-child(2) {
-  left: 16.6667%;
-}
-
-
-/* TUE */
-.day:nth-child(3) {
-  left: 33.3333%;
-}
-
-
-/* WED */
-.day:nth-child(4) {
-  left: 50%;
-}
-
-
-/* THU */
-.day:nth-child(5) {
-  left: 66.6667%;
-}
-
-
-/* FRI */
-.day:nth-child(6) {
-  left: 83.3333%;
-}
-
-
-/* SAT - 오른쪽 끝 */
-.day:nth-child(7) {
-  left: 100%;
-  transform: translateX(-100%);
-  align-items: flex-end;
-}
-
-
-    /*
-      점
-    */
-
-    .dot {
-      width: 11px;
-      height: 11px;
-
-      margin-top: 8px;
-      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       border-radius: 50%;
 
-      background: var(--dot);
+      background: var(--week-off-bg);
+
+      border:
+        1px solid
+        var(--week-off-border);
+
+      color: var(--week-off-text);
+
+      font-size: 11px;
+      font-weight: 600;
+
+      user-select: none;
+
+      transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease;
+
+    }
+
+
+    .week.active {
+
+      background: var(--week-active);
+
+      border-color: #72a9eb;
+
+      color: #ffffff;
+
+      font-weight: 700;
+
+      transform: scale(1.08);
+
+      box-shadow:
+        0 0 0 3px rgba(66,133,212,.13),
+        0 0 12px rgba(66,133,212,.55);
+
+    }
+
+
+
+    /* =========================================================
+       WEEK PROGRESS %
+       ========================================================= */
+
+    .progress-percent {
+
+      margin-left: auto;
+
+      color: var(--text-sub);
+
+      font-size: 9px;
+      font-weight: 600;
+
+      user-select: none;
+
+      white-space: nowrap;
+
+    }
+
+
+
+    /* =========================================================
+       TIMELINE
+       ========================================================= */
+
+    .timeline {
+
+      width: 100%;
+      height: 35px;
+
+      position: relative;
+
+    }
+
+
+
+    /* =========================================================
+       SEGMENT LINE
+
+       Notion 실제 열 비율:
+
+       SUN 14.29
+       MON 14.29
+       TUE 14.29
+       WED 14.29
+       THU 16.07
+       FRI 12.50
+       SAT 14.29
+       ========================================================= */
+
+    .segments {
+
+      position: absolute;
+
+      left: 0;
+      right: 0;
+
+      top: 6px;
+
+      height: 3px;
+
+      display: grid;
+
+      grid-template-columns:
+        14.29fr
+        14.29fr
+        14.29fr
+        14.29fr
+        16.07fr
+        12.5fr;
+
+      overflow: hidden;
+
+      border-radius: 999px;
+
+      z-index: 1;
+
+    }
+
+
+    .segment {
+      height: 100%;
+    }
+
+
+    .segment.sun-mon {
+      background:
+        linear-gradient(
+          90deg,
+          var(--sun),
+          var(--mon)
+        );
+    }
+
+
+    .segment.mon-tue {
+      background:
+        linear-gradient(
+          90deg,
+          var(--mon),
+          var(--tue)
+        );
+    }
+
+
+    .segment.tue-wed {
+      background:
+        linear-gradient(
+          90deg,
+          var(--tue),
+          var(--wed)
+        );
+    }
+
+
+    .segment.wed-thu {
+      background:
+        linear-gradient(
+          90deg,
+          var(--wed),
+          var(--thu)
+        );
+    }
+
+
+    .segment.thu-fri {
+      background:
+        linear-gradient(
+          90deg,
+          var(--thu),
+          var(--fri)
+        );
+    }
+
+
+    .segment.fri-sat {
+      background:
+        linear-gradient(
+          90deg,
+          var(--fri),
+          var(--sat)
+        );
+    }
+
+
+
+    /* =========================================================
+       DAYS
+
+       실제 Notion 열 비율 사용
+       ========================================================= */
+
+    .days {
+
+      position: absolute;
+
+      inset: 0;
+
+      display: grid;
+
+      grid-template-columns:
+        14.29fr
+        14.29fr
+        14.29fr
+        14.29fr
+        16.07fr
+        12.5fr
+        14.29fr;
+
+      z-index: 2;
+
+    }
+
+
+
+    /* =========================================================
+       DAY
+       ========================================================= */
+
+    .day {
+
+      position: relative;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: flex-start;
+
+      color: var(--text-sub);
+
+      font-size: 9px;
+      font-weight: 500;
+
+      letter-spacing: .35px;
+
+      user-select: none;
+
+    }
+
+
+
+    /* =========================================================
+       DOT
+       ========================================================= */
+
+    .dot {
+
+      width: var(--dot-size);
+      height: var(--dot-size);
+
+      flex: 0 0 var(--dot-size);
+
+      margin-top: 2px;
+      margin-bottom: 5px;
+
+      border-radius: 50%;
 
       position: relative;
 
       z-index: 3;
+
+      transition:
+        width .25s ease,
+        height .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease,
+        opacity .25s ease;
+
     }
 
 
-    /*
-      현재 요일
-    */
+
+    /* =========================================================
+       DAY COLORS
+       ========================================================= */
+
+    .day.sun .dot {
+      background: var(--sun);
+    }
+
+    .day.mon .dot {
+      background: var(--mon);
+    }
+
+    .day.tue .dot {
+      background: var(--tue);
+    }
+
+    .day.wed .dot {
+      background: var(--wed);
+    }
+
+    .day.thu .dot {
+      background: var(--thu);
+    }
+
+    .day.fri .dot {
+      background: var(--fri);
+    }
+
+    .day.sat .dot {
+      background: var(--sat);
+    }
+
+
+
+    /* =========================================================
+       FUTURE DAYS
+       살짝 어둡게
+       ========================================================= */
+
+    .day.future .dot {
+      opacity: .35;
+    }
+
+
+    .day.future {
+      color: var(--text-dim);
+    }
+
+
+
+    /* =========================================================
+       CURRENT DAY
+       ========================================================= */
 
     .day.current {
-      color: var(--text-current);
+
+      color: var(--text-main);
 
       font-weight: 700;
+
     }
 
 
     .day.current .dot {
-      width: 14px;
-      height: 14px;
 
-      margin-top: 6.5px;
-      margin-bottom: 4.5px;
+      width: var(--dot-current);
+      height: var(--dot-current);
 
-      background: #ffffff;
+      flex-basis: var(--dot-current);
 
-      border: 3px solid var(--current);
+      margin-top: 0;
+      margin-bottom: 3px;
+
+      border: 3px solid #ffffff;
+
+      transform: scale(1.02);
+
+    }
+
+
+    .day.sun.current .dot {
 
       box-shadow:
-        0 0 0 3px rgba(155,140,255,.14),
-        0 0 12px rgba(155,140,255,.65);
+        0 0 0 3px rgba(164,122,195,.18),
+        0 0 13px var(--sun);
+
     }
 
 
-    /*
-      요일 텍스트
-    */
+    .day.mon.current .dot {
 
-    .label {
+      box-shadow:
+        0 0 0 3px rgba(232,93,63,.18),
+        0 0 13px var(--mon);
+
+    }
+
+
+    .day.tue.current .dot {
+
+      box-shadow:
+        0 0 0 3px rgba(242,140,56,.18),
+        0 0 13px var(--tue);
+
+    }
+
+
+    .day.wed.current .dot {
+
+      box-shadow:
+        0 0 0 3px rgba(242,201,76,.18),
+        0 0 13px var(--wed);
+
+    }
+
+
+    .day.thu.current .dot {
+
+      box-shadow:
+        0 0 0 3px rgba(81,166,117,.18),
+        0 0 13px var(--thu);
+
+    }
+
+
+    .day.fri.current .dot {
+
+      box-shadow:
+        0 0 0 3px rgba(76,154,212,.18),
+        0 0 13px var(--fri);
+
+    }
+
+
+    .day.sat.current .dot {
+
+      box-shadow:
+        0 0 0 3px rgba(116,88,199,.18),
+        0 0 13px var(--sat);
+
+    }
+
+
+
+    /* =========================================================
+       LABELS
+       ========================================================= */
+
+    .day-name {
+
       line-height: 1;
+
+      white-space: nowrap;
+
     }
 
 
-    /*
-      퍼센트
+    .area-name {
 
-      SAT와 분리.
+      margin-top: 3px;
 
-      처음 코드처럼
-      오른쪽 상단에 독립적으로 표시.
-    */
+      color: var(--text-dim);
 
-    .pct {
-  position: absolute;
+      font-size: 8px;
 
-  right: 0;
-  top: -5px;
+      line-height: 1;
 
-  font-size: 9px;
-  font-weight: 600;
+      white-space: nowrap;
 
-  line-height: 1;
+    }
 
-  color: #9a9a9a;
 
-  user-select: none;
+    .day.current .area-name {
 
-  z-index: 10;
-        }
+      color: var(--text-sub);
+
+    }
+
+
+    .day-short {
+      display: none;
+    }
+
+
+
+    /* =========================================================
+       마지막 SAT
+
+       오른쪽 끝에 맞춤
+       ========================================================= */
+
+    .day.sat {
+
+      align-items: flex-end;
+
+      text-align: right;
+
+    }
+
+
+
+    /* =========================================================
+       COMPACT
+       iframe 폭이 좁아지면 영역명 제거
+       ========================================================= */
+
+    @media (max-width: 750px) {
+
+      :root {
+        --hud-padding-x: 10px;
+      }
+
+
+      .area-name {
+        display: none;
+      }
+
+
+      .hud {
+        gap: 10px;
+      }
+
+
+      .timeline {
+        height: 28px;
+      }
+
+    }
+
+
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 480px) {
+
+      :root {
+
+        --hud-padding-x: 7px;
+
+        --week-size: 22px;
+
+        --dot-size: 9px;
+
+        --dot-current: 13px;
+
+      }
+
+
+      body {
+
+        padding-top: 6px;
+        padding-bottom: 4px;
+
+      }
+
+
+      .hud {
+        gap: 8px;
+      }
+
+
+      .week-label {
+        display: none;
+      }
+
+
+      .weeks {
+        gap: 5px;
+      }
+
+
+      .week {
+
+        font-size: 10px;
+
+      }
+
+
+      .progress-percent {
+
+        font-size: 8px;
+
+      }
+
+
+      /*
+        SUN → S
+        MON → M
+        ...
+      */
+
+      .day-full {
+        display: none;
+      }
+
+
+      .day-short {
+        display: block;
+      }
+
+
+      .day {
+
+        font-size: 8px;
+
+      }
+
+
+      .area-name {
+        display: none;
+      }
+
+    }
 
   </style>
 </head>
@@ -308,30 +790,73 @@
 
 <body>
 
-  <div class="wrap">
 
-    <div class="barbox">
+  <div class="hud">
 
 
-      <!-- 퍼센트 -->
+    <!-- =====================================================
+         TOP
+         ===================================================== -->
+
+    <div class="top-row">
+
+
+      <div class="week-label">
+        WEEK
+      </div>
+
+
+      <div class="weeks">
+
+        <div class="week" data-week="1">1</div>
+
+        <div class="week" data-week="2">2</div>
+
+        <div class="week" data-week="3">3</div>
+
+        <div class="week" data-week="4">4</div>
+
+        <div class="week" data-week="5">5</div>
+
+      </div>
+
 
       <div
-        class="pct"
-        id="pct">
+        class="progress-percent"
+        id="progressPercent">
         0%
       </div>
 
 
-      <!-- 진행선 -->
+    </div>
 
-      <div class="line">
 
-        <div
-          class="fill"
-          id="fill">
-        </div>
+
+    <!-- =====================================================
+         TIMELINE
+         ===================================================== -->
+
+    <div class="timeline">
+
+
+      <!-- 색상 연결선 -->
+
+      <div class="segments">
+
+        <div class="segment sun-mon"></div>
+
+        <div class="segment mon-tue"></div>
+
+        <div class="segment tue-wed"></div>
+
+        <div class="segment wed-thu"></div>
+
+        <div class="segment thu-fri"></div>
+
+        <div class="segment fri-sat"></div>
 
       </div>
+
 
 
       <!-- 요일 -->
@@ -339,92 +864,182 @@
       <div class="days">
 
 
-        <div
-          class="day"
-          data-day="0">
+        <!-- SUN -->
+
+        <div class="day sun">
 
           <div class="dot"></div>
 
-          <div class="label">
-            SUN
+          <div class="day-name">
+
+            <span class="day-full">
+              SUN
+            </span>
+
+            <span class="day-short">
+              S
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Time
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="1">
+
+        <!-- MON -->
+
+        <div class="day mon">
 
           <div class="dot"></div>
 
-          <div class="label">
-            MON
+          <div class="day-name">
+
+            <span class="day-full">
+              MON
+            </span>
+
+            <span class="day-short">
+              M
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Health
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="2">
+
+        <!-- TUE -->
+
+        <div class="day tue">
 
           <div class="dot"></div>
 
-          <div class="label">
-            TUE
+          <div class="day-name">
+
+            <span class="day-full">
+              TUE
+            </span>
+
+            <span class="day-short">
+              T
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Space
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="3">
+
+        <!-- WED -->
+
+        <div class="day wed">
 
           <div class="dot"></div>
 
-          <div class="label">
-            WED
+          <div class="day-name">
+
+            <span class="day-full">
+              WED
+            </span>
+
+            <span class="day-short">
+              W
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Money
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="4">
+
+        <!-- THU -->
+
+        <div class="day thu">
 
           <div class="dot"></div>
 
-          <div class="label">
-            THU
+          <div class="day-name">
+
+            <span class="day-full">
+              THU
+            </span>
+
+            <span class="day-short">
+              T
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Work
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="5">
+
+        <!-- FRI -->
+
+        <div class="day fri">
 
           <div class="dot"></div>
 
-          <div class="label">
-            FRI
+          <div class="day-name">
+
+            <span class="day-full">
+              FRI
+            </span>
+
+            <span class="day-short">
+              F
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Relationship
           </div>
 
         </div>
 
 
-        <div
-          class="day"
-          data-day="6">
+
+        <!-- SAT -->
+
+        <div class="day sat">
 
           <div class="dot"></div>
 
-          <div class="label">
-            SAT
+          <div class="day-name">
+
+            <span class="day-full">
+              SAT
+            </span>
+
+            <span class="day-short">
+              S
+            </span>
+
+          </div>
+
+          <div class="area-name">
+            Hobby
           </div>
 
         </div>
@@ -432,124 +1047,258 @@
 
       </div>
 
+
     </div>
+
 
   </div>
 
 
+
   <script>
 
-    function update() {
+    /* =========================================================
+       MONTH WEEK
 
-      const now = new Date();
+       일반적인 일요일 시작 달력 기준.
 
-      const day =
-        now.getDay();
+       예:
+       달의 첫 번째 달력 행 = 1주차
+
+       6번째 행이 생기는 달은 현재 UI가 1~5이므로
+       임시로 5주차로 처리.
+
+       추후 계산 규칙만 교체 가능.
+       ========================================================= */
+
+    function getWeekOfMonth(date) {
+
+      const year =
+        date.getFullYear();
+
+
+      const month =
+        date.getMonth();
+
+
+      const firstDay =
+        new Date(
+          year,
+          month,
+          1
+        );
+
+
+      const firstWeekday =
+        firstDay.getDay();
+
+
+      const currentDate =
+        date.getDate();
+
+
+      const week =
+        Math.ceil(
+          (
+            currentDate +
+            firstWeekday
+          ) / 7
+        );
+
+
+      return Math.min(
+        Math.max(
+          week,
+          1
+        ),
+        5
+      );
+
+    }
+
+
+
+    /* =========================================================
+       UPDATE HUD
+       ========================================================= */
+
+    function updateHUD() {
 
 
       /*
-        하루 진행률
+        방문자 기기의 현지 시간
       */
 
+      const now =
+        new Date();
+
+
+
+      /* =======================================================
+         MONTH WEEK
+         ======================================================= */
+
+      const currentWeek =
+        getWeekOfMonth(now);
+
+
+      document
+        .querySelectorAll(".week")
+        .forEach(
+          element => {
+
+
+            const week =
+              Number(
+                element.dataset.week
+              );
+
+
+            element
+              .classList
+              .toggle(
+                "active",
+                week === currentWeek
+              );
+
+
+          }
+        );
+
+
+
+      /* =======================================================
+         DAY
+         ======================================================= */
+
+      const currentDay =
+        now.getDay();
+
+
+      document
+        .querySelectorAll(".day")
+        .forEach(
+          (element, index) => {
+
+
+            element.classList.remove(
+              "past",
+              "current",
+              "future"
+            );
+
+
+            if (index < currentDay) {
+
+              element.classList.add(
+                "past"
+              );
+
+            }
+
+
+            else if (
+              index === currentDay
+            ) {
+
+              element.classList.add(
+                "current"
+              );
+
+            }
+
+
+            else {
+
+              element.classList.add(
+                "future"
+              );
+
+            }
+
+
+          }
+        );
+
+
+
+      /* =======================================================
+         TODAY PROGRESS
+         ======================================================= */
+
       const secondsToday =
+
         now.getHours() * 3600 +
+
         now.getMinutes() * 60 +
+
         now.getSeconds();
+
 
 
       const dayProgress =
         secondsToday / 86400;
 
 
-      /*
-        전체 주 진행률
 
-        Sun 00:00 = 0%
-        다음 Sun 00:00 = 100%
-      */
+      /* =======================================================
+         WEEK PROGRESS
+
+         Sunday 00:00 = 0%
+         다음 Sunday 00:00 = 100%
+         ======================================================= */
 
       const weekPosition =
-        day + dayProgress;
+        currentDay +
+        dayProgress;
 
 
-      const pct =
-        (weekPosition / 7) * 100;
+      const weekProgress =
+        (
+          weekPosition /
+          7
+        ) * 100;
 
-
-      /*
-        선 진행률
-
-        SUN 점 → SAT 점 사이가
-        총 6구간이므로 별도로 계산
-      */
-
-      let linePct =
-        (weekPosition / 6) * 100;
-
-
-      linePct =
-        Math.max(
-          0,
-          Math.min(
-            linePct,
-            100
-          )
-        );
 
 
       document
-        .getElementById("fill")
-        .style.width =
-        linePct + "%";
-
-
-      document
-        .getElementById("pct")
+        .getElementById(
+          "progressPercent"
+        )
         .textContent =
-        Math.round(pct) + "%";
+
+        Math.round(
+          weekProgress
+        ) + "%";
 
 
-      /*
-        현재 요일 강조
-      */
-
-      const days =
-        document.querySelectorAll(
-          ".day"
-        );
-
-
-      days.forEach(
-        (element, index) => {
-
-          element.classList.remove(
-            "current"
-          );
-
-
-          if (index === day) {
-
-            element.classList.add(
-              "current"
-            );
-
-          }
-
-        }
-      );
 
     }
 
 
-    update();
 
+    /* =========================================================
+       INITIAL
+       ========================================================= */
+
+    updateHUD();
+
+
+
+    /* =========================================================
+       AUTO REFRESH
+
+       1분마다 갱신
+       ========================================================= */
 
     setInterval(
-      update,
+      updateHUD,
       60 * 1000
     );
 
+
   </script>
+
 
 </body>
 </html>
