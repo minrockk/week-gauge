@@ -10,21 +10,22 @@
       /* Notion Dark */
       --bg: #191919;
 
-      /* Track */
-      --track: #373737;
+      /* Timeline */
+      --track: #3a3a3a;
       --fill: #8b7cf6;
 
-      /* Day dots */
-      --dot: #4a4a4a;
-      --dot-past: #707070;
+      /* Dots */
+      --dot-future: #4c4c4c;
+      --dot-past: #737373;
       --dot-current: #9b8cff;
 
       /* Text */
-      --text: #8b8b8b;
-      --text-current: #eeeeee;
+      --text: #888888;
+      --text-current: #f1f1f1;
 
-      --height: 64px;
-      --xpad: 18px;
+      /* Layout */
+      --hud-height: 54px;
+      --side-padding: 10px;
     }
 
     * {
@@ -35,8 +36,10 @@
     body {
       margin: 0;
       padding: 0;
+
       width: 100%;
-      height: var(--height);
+      height: var(--hud-height);
+
       overflow: hidden;
 
       background: var(--bg);
@@ -50,103 +53,168 @@
         sans-serif;
     }
 
-    .week-hud {
-      width: 100%;
-      height: 100%;
-
-      padding: 10px var(--xpad) 0;
-
+    body {
       display: flex;
       align-items: flex-start;
+      justify-content: center;
     }
+
+
+    /* ==================================================
+       HUD 전체
+       ================================================== */
+
+    .week-hud {
+      width: 100%;
+      height: var(--hud-height);
+
+      padding:
+        8px
+        var(--side-padding)
+        0;
+
+      position: relative;
+    }
+
+
+    /* ==================================================
+       Timeline 영역
+       ================================================== */
 
     .timeline {
-      position: relative;
       width: 100%;
-      height: 50px;
+      height: 46px;
+
+      position: relative;
     }
 
-    /* =========================
-       진행선
-       ========================= */
+
+    /* ==================================================
+       기본 진행선
+
+       첫 번째 요일 점 중앙에서
+       마지막 요일 점 중앙까지만 선이 존재
+       ================================================== */
 
     .track {
       position: absolute;
 
-      /* 첫 번째/마지막 점의 중앙에 선 끝을 맞춤 */
+      /*
+        7개 컬럼이므로
+        각 컬럼 폭 = 1/7
+
+        첫 점 중앙 =
+        전체 폭의 1/14
+      */
+
       left: calc(100% / 14);
       right: calc(100% / 14);
 
-      top: 8px;
+      top: 7px;
+
       height: 3px;
 
-      background: var(--track);
       border-radius: 999px;
 
+      background: var(--track);
+
       overflow: hidden;
+
+      z-index: 1;
     }
+
+
+    /* ==================================================
+       지나간 시간
+       ================================================== */
 
     .fill {
       width: 0%;
       height: 100%;
 
-      background: var(--fill);
       border-radius: 999px;
+
+      background: linear-gradient(
+        90deg,
+        #7768e8,
+        #9b8cff
+      );
 
       transition: width 0.4s ease;
     }
 
-    /* =========================
-       요일
-       ========================= */
+
+    /* ==================================================
+       7개 요일 Grid
+       ================================================== */
 
     .days {
-      position: relative;
-
       width: 100%;
       height: 100%;
 
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+
+      grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+
+      position: relative;
+
+      z-index: 2;
     }
+
+
+    /* ==================================================
+       각 요일
+       ================================================== */
 
     .day {
       position: relative;
 
+      min-width: 0;
+
       display: flex;
       flex-direction: column;
+
       align-items: center;
 
       color: var(--text);
 
       font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+      font-weight: 500;
+
+      letter-spacing: 0.45px;
 
       user-select: none;
     }
 
-    /* 원 */
+
+    /* ==================================================
+       요일 점
+       ================================================== */
 
     .dot {
       width: 11px;
       height: 11px;
 
-      margin-top: 4px;
-      margin-bottom: 8px;
+      flex: 0 0 11px;
+
+      margin-top: 3px;
+      margin-bottom: 7px;
 
       border-radius: 50%;
 
-      background: var(--dot);
+      background: var(--dot-future);
 
       position: relative;
-      z-index: 2;
+
+      z-index: 3;
 
       transition:
-        transform 0.25s ease,
         background 0.25s ease,
+        transform 0.25s ease,
         box-shadow 0.25s ease;
     }
+
 
     /* 지나간 요일 */
 
@@ -154,58 +222,104 @@
       background: var(--dot-past);
     }
 
-    /* 오늘 */
+
+    /* ==================================================
+       현재 요일
+       ================================================== */
 
     .day.current {
       color: var(--text-current);
+
+      font-weight: 700;
     }
 
     .day.current .dot {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
 
-      margin-top: 3px;
-      margin-bottom: 7px;
+      flex-basis: 14px;
 
-      background: white;
+      margin-top: 1.5px;
+      margin-bottom: 5.5px;
+
+      background: #ffffff;
 
       border: 3px solid var(--dot-current);
 
       box-shadow:
-        0 0 0 3px rgba(155, 140, 255, 0.16),
+        0 0 0 3px rgba(155, 140, 255, 0.14),
         0 0 12px rgba(155, 140, 255, 0.65);
 
-      transform: scale(1.08);
+      transform: scale(1.04);
     }
 
-    /* 요일 글자 */
+
+    /* ==================================================
+       요일 글자
+       ================================================== */
 
     .label {
       line-height: 1;
+
+      white-space: nowrap;
     }
 
-    /* =========================
-       퍼센트
-       ========================= */
 
-    .percent {
+    /* ==================================================
+       진행률
+
+       현재 요일 위에 표시
+       ================================================== */
+
+    .progress {
       position: absolute;
 
       top: -2px;
-      right: 0;
+
+      transform: translateX(-50%);
 
       color: var(--text-current);
 
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 700;
 
       line-height: 1;
 
+      white-space: nowrap;
+
+      pointer-events: none;
+
       user-select: none;
+
+      z-index: 5;
+
+      transition: left 0.3s ease;
+    }
+
+
+    /* ==================================================
+       좁은 화면 대응
+       ================================================== */
+
+    @media (max-width: 700px) {
+
+      :root {
+        --side-padding: 4px;
+      }
+
+      .label {
+        font-size: 9px;
+      }
+
+      .progress {
+        font-size: 9px;
+      }
+
     }
 
   </style>
 </head>
+
 
 <body>
 
@@ -213,57 +327,141 @@
 
     <div class="timeline">
 
-      <!-- 진행선 -->
+
+      <!-- =====================
+           진행선
+           ===================== -->
+
       <div class="track">
-        <div class="fill" id="fill"></div>
+
+        <div
+          class="fill"
+          id="fill">
+        </div>
+
       </div>
 
-      <!-- 요일 -->
+
+
+      <!-- =====================
+           요일
+           ===================== -->
+
       <div class="days">
 
-        <div class="day" data-day="0">
+
+        <div
+          class="day"
+          data-day="0">
+
           <div class="dot"></div>
-          <div class="label">SUN</div>
+
+          <div class="label">
+            SUN
+          </div>
+
         </div>
 
-        <div class="day" data-day="1">
+
+        <div
+          class="day"
+          data-day="1">
+
           <div class="dot"></div>
-          <div class="label">MON</div>
+
+          <div class="label">
+            MON
+          </div>
+
         </div>
 
-        <div class="day" data-day="2">
+
+        <div
+          class="day"
+          data-day="2">
+
           <div class="dot"></div>
-          <div class="label">TUE</div>
+
+          <div class="label">
+            TUE
+          </div>
+
         </div>
 
-        <div class="day" data-day="3">
+
+        <div
+          class="day"
+          data-day="3">
+
           <div class="dot"></div>
-          <div class="label">WED</div>
+
+          <div class="label">
+            WED
+          </div>
+
         </div>
 
-        <div class="day" data-day="4">
+
+        <div
+          class="day"
+          data-day="4">
+
           <div class="dot"></div>
-          <div class="label">THU</div>
+
+          <div class="label">
+            THU
+          </div>
+
         </div>
 
-        <div class="day" data-day="5">
+
+        <div
+          class="day"
+          data-day="5">
+
           <div class="dot"></div>
-          <div class="label">FRI</div>
+
+          <div class="label">
+            FRI
+          </div>
+
         </div>
 
-        <div class="day" data-day="6">
+
+        <div
+          class="day"
+          data-day="6">
+
           <div class="dot"></div>
-          <div class="label">SAT</div>
+
+          <div class="label">
+            SAT
+          </div>
+
         </div>
+
 
       </div>
 
-      <!-- 진행률 -->
-      <div class="percent" id="percent">0%</div>
+
+
+      <!-- =====================
+           진행률
+           ===================== -->
+
+      <div
+        class="progress"
+        id="progress">
+
+        0%
+
+      </div>
+
 
     </div>
 
   </div>
+
 
 
   <script>
@@ -272,106 +470,163 @@
 
       const now = new Date();
 
-      /*
-        getDay()
-        0 = Sunday
-        1 = Monday
-        ...
-        6 = Saturday
-      */
+
+      /* ==============================================
+         현재 요일
+
+         0 = Sunday
+         1 = Monday
+         ...
+         6 = Saturday
+         ============================================== */
 
       const day = now.getDay();
 
-      /*
-        하루 안에서도 진행되도록 계산
 
-        예:
-        수요일 정오라면
-        3일 + 0.5일
-      */
+
+      /* ==============================================
+         오늘 하루가 얼마나 지났는지 계산
+         ============================================== */
 
       const secondsToday =
         now.getHours() * 3600 +
         now.getMinutes() * 60 +
         now.getSeconds();
 
+
       const dayProgress =
         secondsToday / 86400;
 
-      /*
-        일요일 00:00 = 0
-        토요일 23:59 ≈ 100%
-      */
-
-      const weekProgress =
-        (day + dayProgress) / 7;
-
-      const percent =
-        weekProgress * 100;
 
 
-      /* -------------------------
-         진행선
+      /* ==============================================
+         전체 주간 진행률
 
-         track 자체는
-         SUN 점 → SAT 점까지만 존재함.
+         Sunday 00:00 = 0%
+         Saturday 23:59 ≈ 100%
+         ============================================== */
 
-         따라서 일주일 진행률을
-         6개 요일 간격 기준으로 변환.
-         ------------------------- */
+      const weekPosition =
+        day + dayProgress;
 
-      let lineProgress =
-        ((day + dayProgress) / 6) * 100;
 
-      lineProgress =
-        Math.min(lineProgress, 100);
+      const weekPercent =
+        (weekPosition / 7) * 100;
+
+
+
+      /* ==============================================
+         Timeline 진행률
+
+         선은 SUN → SAT까지이므로
+         실제 선은 6개의 간격으로 구성됨.
+         ============================================== */
+
+      let linePercent =
+        (weekPosition / 6) * 100;
+
+
+      linePercent =
+        Math.max(
+          0,
+          Math.min(
+            linePercent,
+            100
+          )
+        );
+
 
       document
         .getElementById("fill")
         .style.width =
-        lineProgress + "%";
+        linePercent + "%";
 
 
-      /* -------------------------
-         퍼센트
-         ------------------------- */
 
-      document
-        .getElementById("percent")
-        .textContent =
-        Math.round(percent) + "%";
+      /* ==============================================
+         퍼센트 숫자
+         ============================================== */
 
-
-      /* -------------------------
-         요일 상태
-         ------------------------- */
-
-      const days =
-        document.querySelectorAll(".day");
-
-      days.forEach((element, index) => {
-
-        element.classList.remove(
-          "past",
-          "current"
+      const progress =
+        document.getElementById(
+          "progress"
         );
 
-        if (index < day) {
-          element.classList.add("past");
-        }
 
-        if (index === day) {
-          element.classList.add("current");
-        }
+      progress.textContent =
+        Math.round(
+          weekPercent
+        ) + "%";
 
-      });
+
+
+      /* ==============================================
+         진행률 숫자의 위치
+
+         각 요일 컬럼의 중앙에 위치시킴.
+
+         SUN = 1/14
+         MON = 3/14
+         ...
+         SAT = 13/14
+         ============================================== */
+
+      const dayCenter =
+        ((day * 2 + 1) / 14) * 100;
+
+
+      progress.style.left =
+        dayCenter + "%";
+
+
+
+      /* ==============================================
+         요일 상태 업데이트
+         ============================================== */
+
+      const days =
+        document.querySelectorAll(
+          ".day"
+        );
+
+
+      days.forEach(
+        (element, index) => {
+
+          element.classList.remove(
+            "past",
+            "current"
+          );
+
+
+          if (index < day) {
+
+            element.classList.add(
+              "past"
+            );
+
+          }
+
+
+          if (index === day) {
+
+            element.classList.add(
+              "current"
+            );
+
+          }
+
+        }
+      );
 
     }
 
 
-    /* 처음 실행 */
+
+    /* 최초 실행 */
 
     updateWeekHUD();
+
 
 
     /* 1분마다 업데이트 */
