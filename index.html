@@ -299,13 +299,7 @@
 
       display: grid;
 
-      grid-template-columns:
-        14.29fr
-        14.29fr
-        14.29fr
-        14.29fr
-        16.07fr
-        12.5fr;
+      grid-template-columns: repeat(6, 1fr);
 
       overflow: hidden;
 
@@ -419,30 +413,37 @@
       user-select: none;
 
     }
-/* Notion 하단 7개 열 시작점에 맞춤 */
+/* =========================================================
+   DAY POSITIONS
+
+   SUN = 0%
+   SAT = 100%
+
+   SUN ↔ SAT 사이를 정확히 6등분
+   ========================================================= */
 
 .day.sun {
   left: 0%;
 }
 
 .day.mon {
-  left: 14.1%;
+  left: 16.6667%;
 }
 
 .day.tue {
-  left: 28.1%;
+  left: 33.3333%;
 }
 
 .day.wed {
-  left: 42.2%;
+  left: 50%;
 }
 
 .day.thu {
-  left: 56.2%;
+  left: 66.6667%;
 }
 
 .day.fri {
-  left: 71.3%;
+  left: 83.3333%;
 }
 
 .day.sat {
