@@ -388,26 +388,11 @@
        실제 Notion 열 비율 사용
        ========================================================= */
 
-    .days {
-
-      position: absolute;
-
-      inset: 0;
-
-      display: grid;
-
-      grid-template-columns:
-        14.29fr
-        14.29fr
-        14.29fr
-        14.29fr
-        16.07fr
-        12.5fr
-        14.29fr;
-
-      z-index: 2;
-
-    }
+.days {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
 
 
 
@@ -417,7 +402,7 @@
 
     .day {
 
-      position: relative;
+      position: absolute;
 
       display: flex;
       flex-direction: column;
@@ -434,7 +419,36 @@
       user-select: none;
 
     }
+/* Notion 하단 7개 열 시작점에 맞춤 */
 
+.day.sun {
+  left: 0%;
+}
+
+.day.mon {
+  left: 14.1%;
+}
+
+.day.tue {
+  left: 28.1%;
+}
+
+.day.wed {
+  left: 42.2%;
+}
+
+.day.thu {
+  left: 56.2%;
+}
+
+.day.fri {
+  left: 71.3%;
+}
+
+.day.sat {
+  left: 100%;
+  transform: translateX(-100%);
+}
 
 
     /* =========================================================
