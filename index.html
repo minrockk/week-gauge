@@ -4,133 +4,384 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Week HUD</title>
+
   <style>
-    :root{
-      --bg: transparent;
+    :root {
+      /* Notion Dark */
+      --bg: #191919;
 
-      --line-bg: rgba(255,255,255,.18);
-      --line-fill: rgba(255,255,255,.88);
-      --shadow: rgba(0,0,0,.35);
+      /* Track */
+      --track: #373737;
+      --fill: #8b7cf6;
 
-      --text: rgba(255,255,255,.85);
+      /* Day dots */
+      --dot: #4a4a4a;
+      --dot-past: #707070;
+      --dot-current: #9b8cff;
 
-      /* 노션 임베드 높이(여기 조절해도 되고, 안 해도 됨) */
-      --h: 52px;
+      /* Text */
+      --text: #8b8b8b;
+      --text-current: #eeeeee;
 
-      /* 좌우 안전 여백: 0이면 완전 끝까지 */
-      --xpad: 4px;
+      --height: 64px;
+      --xpad: 18px;
     }
 
-    html, body{
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      width: 100%;
+      height: var(--height);
+      overflow: hidden;
+
       background: var(--bg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      box-sizing: border-box;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Apple SD Gothic Neo",
+        "Noto Sans KR",
+        sans-serif;
     }
 
-    body{
-      height: var(--h);
-      overflow: hidden;
-    }
-
-    .wrap{
+    .week-hud {
       width: 100%;
       height: 100%;
-      padding: 0 var(--xpad);
-      box-sizing: border-box;
 
-      /* 핵심: 바를 아래로 최대한 밀착 */
+      padding: 10px var(--xpad) 0;
+
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
     }
 
-    /* 바 + 오버레이(퍼센트)를 묶는 컨테이너 */
-    .barbox{
-      width: 100%;
+    .timeline {
       position: relative;
+      width: 100%;
+      height: 50px;
     }
 
-    .line{
-      width: 100%;
-      height: 22px;
+    /* =========================
+       진행선
+       ========================= */
+
+    .track {
+      position: absolute;
+
+      /* 첫 번째/마지막 점의 중앙에 선 끝을 맞춤 */
+      left: calc(100% / 14);
+      right: calc(100% / 14);
+
+      top: 8px;
+      height: 3px;
+
+      background: var(--track);
       border-radius: 999px;
-      background: var(--line-bg);
-      position: relative;
+
       overflow: hidden;
-      box-shadow: 0 2px 10px var(--shadow) inset;
     }
 
-    .fill{
-      height: 100%;
+    .fill {
       width: 0%;
-      background: var(--line-fill);
+      height: 100%;
+
+      background: var(--fill);
       border-radius: 999px;
-      transition: width .35s ease;
+
+      transition: width 0.4s ease;
     }
 
-    .cursor{
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      background: white;
-      box-shadow: 0 2px 14px rgba(0,0,0,.45);
-      pointer-events: none;
+    /* =========================
+       요일
+       ========================= */
+
+    .days {
+      position: relative;
+
+      width: 100%;
+      height: 100%;
+
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
     }
 
-    /* 퍼센트: 바 위 오른쪽(오버레이) */
-    .pct{
-      position: absolute;
-      right: 0;
-      bottom: calc(22px + 6px); /* 바 높이(22px) + 간격(6px) */
-      font-weight: 800;
-      font-size: 12px;
-      line-height: 1;
+    .day {
+      position: relative;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
       color: var(--text);
+
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+
       user-select: none;
-      text-shadow: 0 2px 8px rgba(0,0,0,.45);
     }
 
-    /* 더 타이트하게 하고 싶으면:
-       - bottom 간격 6px -> 4px
-       - font-size 12 -> 11
-    */
+    /* 원 */
+
+    .dot {
+      width: 11px;
+      height: 11px;
+
+      margin-top: 4px;
+      margin-bottom: 8px;
+
+      border-radius: 50%;
+
+      background: var(--dot);
+
+      position: relative;
+      z-index: 2;
+
+      transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+    /* 지나간 요일 */
+
+    .day.past .dot {
+      background: var(--dot-past);
+    }
+
+    /* 오늘 */
+
+    .day.current {
+      color: var(--text-current);
+    }
+
+    .day.current .dot {
+      width: 13px;
+      height: 13px;
+
+      margin-top: 3px;
+      margin-bottom: 7px;
+
+      background: white;
+
+      border: 3px solid var(--dot-current);
+
+      box-shadow:
+        0 0 0 3px rgba(155, 140, 255, 0.16),
+        0 0 12px rgba(155, 140, 255, 0.65);
+
+      transform: scale(1.08);
+    }
+
+    /* 요일 글자 */
+
+    .label {
+      line-height: 1;
+    }
+
+    /* =========================
+       퍼센트
+       ========================= */
+
+    .percent {
+      position: absolute;
+
+      top: -2px;
+      right: 0;
+
+      color: var(--text-current);
+
+      font-size: 12px;
+      font-weight: 700;
+
+      line-height: 1;
+
+      user-select: none;
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="barbox">
-      <div class="pct" id="pct">0%</div>
-      <div class="line" aria-label="Week Progress">
+
+  <div class="week-hud">
+
+    <div class="timeline">
+
+      <!-- 진행선 -->
+      <div class="track">
         <div class="fill" id="fill"></div>
-        <div class="cursor" id="cursor"></div>
       </div>
+
+      <!-- 요일 -->
+      <div class="days">
+
+        <div class="day" data-day="0">
+          <div class="dot"></div>
+          <div class="label">SUN</div>
+        </div>
+
+        <div class="day" data-day="1">
+          <div class="dot"></div>
+          <div class="label">MON</div>
+        </div>
+
+        <div class="day" data-day="2">
+          <div class="dot"></div>
+          <div class="label">TUE</div>
+        </div>
+
+        <div class="day" data-day="3">
+          <div class="dot"></div>
+          <div class="label">WED</div>
+        </div>
+
+        <div class="day" data-day="4">
+          <div class="dot"></div>
+          <div class="label">THU</div>
+        </div>
+
+        <div class="day" data-day="5">
+          <div class="dot"></div>
+          <div class="label">FRI</div>
+        </div>
+
+        <div class="day" data-day="6">
+          <div class="dot"></div>
+          <div class="label">SAT</div>
+        </div>
+
+      </div>
+
+      <!-- 진행률 -->
+      <div class="percent" id="percent">0%</div>
+
     </div>
+
   </div>
 
+
   <script>
-    function update(){
-      const day = new Date().getDay(); // 0=Sun ... 6=Sat
 
-      // 바/커서: 7칸 슬롯 중앙 기준(요일 대응)
-      const slot = 100 / 7;
-      const cursorPos = slot * day + slot / 2;
+    function updateWeekHUD() {
 
-      // 퍼센트 표기: Sun=0, Sat=100
-      const pct = (day / 6) * 100;
+      const now = new Date();
 
-      document.getElementById("fill").style.width = cursorPos + "%";
-      document.getElementById("cursor").style.left = cursorPos + "%";
-      document.getElementById("pct").textContent = Math.round(pct) + "%";
+      /*
+        getDay()
+        0 = Sunday
+        1 = Monday
+        ...
+        6 = Saturday
+      */
+
+      const day = now.getDay();
+
+      /*
+        하루 안에서도 진행되도록 계산
+
+        예:
+        수요일 정오라면
+        3일 + 0.5일
+      */
+
+      const secondsToday =
+        now.getHours() * 3600 +
+        now.getMinutes() * 60 +
+        now.getSeconds();
+
+      const dayProgress =
+        secondsToday / 86400;
+
+      /*
+        일요일 00:00 = 0
+        토요일 23:59 ≈ 100%
+      */
+
+      const weekProgress =
+        (day + dayProgress) / 7;
+
+      const percent =
+        weekProgress * 100;
+
+
+      /* -------------------------
+         진행선
+
+         track 자체는
+         SUN 점 → SAT 점까지만 존재함.
+
+         따라서 일주일 진행률을
+         6개 요일 간격 기준으로 변환.
+         ------------------------- */
+
+      let lineProgress =
+        ((day + dayProgress) / 6) * 100;
+
+      lineProgress =
+        Math.min(lineProgress, 100);
+
+      document
+        .getElementById("fill")
+        .style.width =
+        lineProgress + "%";
+
+
+      /* -------------------------
+         퍼센트
+         ------------------------- */
+
+      document
+        .getElementById("percent")
+        .textContent =
+        Math.round(percent) + "%";
+
+
+      /* -------------------------
+         요일 상태
+         ------------------------- */
+
+      const days =
+        document.querySelectorAll(".day");
+
+      days.forEach((element, index) => {
+
+        element.classList.remove(
+          "past",
+          "current"
+        );
+
+        if (index < day) {
+          element.classList.add("past");
+        }
+
+        if (index === day) {
+          element.classList.add("current");
+        }
+
+      });
+
     }
 
-    update();
-    setInterval(update, 60 * 1000);
+
+    /* 처음 실행 */
+
+    updateWeekHUD();
+
+
+    /* 1분마다 업데이트 */
+
+    setInterval(
+      updateWeekHUD,
+      60 * 1000
+    );
+
   </script>
+
 </body>
 </html>
